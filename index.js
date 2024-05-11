@@ -23,6 +23,12 @@ let scriptFile = fs.readFileSync(pathToScript)
 let pathToScriptIo = path.join(__dirname, "static", "socket.io.min.js")
 let scriptFileIo = fs.readFileSync(pathToScriptIo)
 
+let pathToReg = path.join(__dirname, "static", "reg.html")
+let regHtmlFile = fs.readFileSync(pathToReg)
+
+let pathToAuthScript = path.join(__dirname, "static", "auth.js")
+let authScript = fs.readFileSync(pathToAuthScript)
+
 let server = http.createServer((req, res) => {
     try {
         if (req.url == "/" && req.method == "GET") {
@@ -39,6 +45,18 @@ let server = http.createServer((req, res) => {
 
         if (req.url == "/socket.io.min.js" && req.method == "GET") {
             return res.end(scriptFileIo)
+        }
+
+        if (req.url == "/register" && req.method == "GET") {
+            return res.end(regHtmlFile)
+        }
+
+        if (req.url == "/auth.js" && req.method == "GET") {
+            return res.end(authScript)
+        }
+
+        if (req.url == "/api/register" && req.method == "POST") {
+            return registerUser(req, res)
         }
 
 
@@ -68,3 +86,15 @@ io.on("connection", (socket) => {
         io.emit("message", username + " : " + data)
     })
 })
+
+function registerUser(req, res){
+    let data = ""
+    req.on("data", function(chunk){
+        data += chunk
+    })
+    req.on("end", function(){
+        data = JSON.parse(data)
+        console.log(data)
+    })
+    res.end()
+}

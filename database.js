@@ -27,9 +27,9 @@ try {
             `);
         await db.exec(`
                 INSERT INTO user(login, password) VALUES
-                ("admin", "admin"),
-                ("bohdan", "bohdan"),
-                ("DANYA", "CHAIKA");
+                ("lena", "golovach"),
+                ("Vo", "Wonder"),
+                ("bebra", "men");
             `);
     }
 } catch (error) {
@@ -48,5 +48,13 @@ export async function addMessage(msg, userid) {
         await db.run(`insert into message(content, author) values (?, ?)`, [msg, userid]);
     } catch (error) {
         console.error(error);
+    }
+}
+export async function isExistUser(login){
+    try{
+        let candidate = await db.all(`select * from user where login = ?`, [login])
+        return !candidate.length
+    }catch(err){
+        console.error(errr)
     }
 }
