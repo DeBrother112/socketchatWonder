@@ -1,13 +1,10 @@
 import http from "http"
 import path from "path"
-import fs from "fs" 
+import fs from "fs"
 import { Server } from "socket.io"
-import {getMessages, addMessage} from "./database.js"
+import { getMessages, addMessage, isExistUser, addUser } from "./database.js"
 
-await addMessage("hello", 1)
-let m = await getMessages()
-console.log(m)
-
+const validTokens = []
 const __dirname = path.resolve()
 
 
@@ -28,6 +25,9 @@ let regHtmlFile = fs.readFileSync(pathToReg)
 
 let pathToAuthScript = path.join(__dirname, "static", "auth.js")
 let authScript = fs.readFileSync(pathToAuthScript)
+
+let pathToLoginHtml = path.join(__dirname, "static", "login.html")
+let LoginHtmlFile = fs.readFileSync(pathToLoginHtml)
 
 let server = http.createServer((req, res) => {
     try {
@@ -59,6 +59,14 @@ let server = http.createServer((req, res) => {
             return registerUser(req, res)
         }
 
+        if (req.url == "/login" && req.method == "GET") {
+            return res.end(LoginHtmlFile)
+        }
+
+        if (req.url == "/api/login" && req.method == "POST") {
+            return loginUser(req, res)
+        }
+
 
         res.writeHead(404, "Page not found")
         return res.end()
@@ -87,14 +95,63 @@ io.on("connection", (socket) => {
     })
 })
 
-function registerUser(req, res){
+function registerUser(req, res) {
     let data = ""
-    req.on("data", function(chunk){
+    req.on("data", function (chunk) {
         data += chunk
     })
-    req.on("end", function(){
-        data = JSON.parse(data)
-        console.log(data)
+    req.on("end", async function () {
+        try {
+            data = JSON.parse(data)
+            if (!data.login || !data.password) {
+                res.end("login or/and password is empty")
+                return
+            }
+
+            if (!await isExistUser(data.login)) {
+                res.end("User is already exist. Change your login.")
+                return
+            }
+
+        } catch (err) {
+            console.log(err)
+            res.end("Error: " + err)
+        }
+
+        await addUser(data.login, data.password)
+        res.end("Register success!")
+
+    })
+    res.end()
+}
+
+function loginUser(req, res) {
+    let data = ""
+    req.on("data", function (chunk) {
+        data += chunk
+    })
+    req.on("end", async function () {
+        try {
+            data = JSON.parse(data)
+            if (!data.login || !data.password) {
+                res.end("login and/or password is empty")
+                return
+            }
+
+            let token = await getAuthToken(data)
+            validTokens.push(token)
+            res.writeHead(200)
+            res.end(token)
+
+        } catch (err) {
+            console.log(err)
+            res.writeHead(500)
+            res.end("Error: " + err)
+        }
+
+        await addUser(data.login, data.password)
+        res.end("Log in success!")
+
     })
     res.end()
 }

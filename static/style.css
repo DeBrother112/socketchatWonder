@@ -92,3 +92,37 @@ body {
     background-color: rgb(180, 117, 0);
     color: black;
 }
+
+.login {
+    margin-top: 5rem;
+    display: flex;
+    flex-direction: column;
+    width: 40vw;
+    text-align: center;
+    margin: 10rem auto;
+    background-color: blue;
+    color: white;
+    font-weight: 1000;
+    padding: 1rem;
+    border-radius: 1rem;
+}
+
+.login input {
+    margin-bottom: 1.5rem;
+    padding: 0.3rem;
+    border-radius: 0.3rem;
+}
+
+.login input[type="submit"] {
+    background-color: orange;
+    color: white;
+    width: fit-content;
+    align-self: center;
+    padding: 0.3rem 1rem;
+    cursor: pointer;
+}
+
+.login input[type="submit"]:hover {
+    background-color: rgb(180, 117, 0);
+    color: black;
+}
